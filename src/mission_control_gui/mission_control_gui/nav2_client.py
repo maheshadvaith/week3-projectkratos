@@ -1,3 +1,5 @@
+import future
+
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
@@ -17,7 +19,7 @@ class Client(Node):
         
     
     def send_goal(self, waypoint):
-        self.window.LogsText.append(f"Waiting for server...")
+        print(f"Waiting for server...")
         self.action_client.wait_for_server()
         goal = NavigateToPose.Goal()
         goal.pose.header.frame_id = "map"
@@ -28,27 +30,31 @@ class Client(Node):
         future.add_done_callback(self.goal_response)
 
     def feedback(self,msg):
-        self.window.LogsText.append(f"Feedback: distance remaining: {msg.feedback.distance_remaining} m")
+        print(f"Feedback: distance remaining: {msg.feedback.distance_remaining} m")
     
     
     def goal_response(self,future): 
         self.goal_handle = future.result()
         if self.goal_handle.accepted:
-            self.window.LogsText.append("Goal accepted")
+            print("Goal accepted")
             result_future = self.goal_handle.get_result_async()
             result_future.add_done_callback(self.result_response)
         else:
-            self.window.LogsText.append("Goal rejected")
+            print("Goal rejected")
     
     def result_response(self,future):
-        if future.result().status == self.goal_handle.STATUS_SUCCEEDED:
-            self.window.LogsText.append(f"Waypoint {self.current_waypoint + 1} succeeded")
-        else:
-            self.window.LogsText.append(f"Waypoint {self.current_waypoint + 1} failed")
+        # if future.result().status == self.goal_handle.STATUS_SUCCEEDED:
+        #     print(f"Waypoint {self.current_waypoint + 1} succeeded")
+        # else:
+        #     print(f"Waypoint {self.current_waypoint + 1} failed")
+        print("Result callback reached")
+        print(future.result())
+        print(future.result().status)
+        
         
         self.current_waypoint += 1
         if self.current_waypoint < len(self.waypoints):
             self.send_goal(self.waypoints[self.current_waypoint])
         else:
-            self.window.LogsText.append("All waypoints completed")
+            print("All waypoints completed")
         
