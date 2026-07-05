@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication
 from mission_control_gui.main_window import CreateWindow
 from mission_control_gui.nav2_client import Client
 
-
+import threading
 
 
 def main():
@@ -18,8 +18,11 @@ def main():
     window = CreateWindow(nav2_client)
     nav2_client.window = window
     window.show()
+    ros_thread = threading.Thread(target=rclpy.spin, args=(nav2_client,), daemon=True)
+    ros_thread.start()
+    
     app.exec_()
-    rclpy.spin(nav2_client)
+    nav2_client.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
