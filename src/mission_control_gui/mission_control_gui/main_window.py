@@ -1,8 +1,10 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication,QWidget, QGridLayout, QLabel, QLineEdit, QPushButton, QTextEdit
 
 class CreateWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, nav2_client):
         super().__init__()
+        self.nav2_client = nav2_client
+        
         self.setWindowTitle("Mission Control GUI")
         self.setGeometry(100, 100, 800, 600)
 
@@ -45,22 +47,30 @@ class CreateWindow(QMainWindow):
 
         self.SubmitButton.clicked.connect(self.submit)
 
-        def submit(self):
-            waypoint1 = (self.waypoint1X.text(), self.waypoint1Y.text())
-            waypoint2 = (self.waypoint2X.text(), self.waypoint2Y.text())
-            waypoint3 = (self.waypoint3X.text(), self.waypoint3Y.text())
+    def submit(self):
+            waypoint1 = [self.waypoint1X.text(), self.waypoint1Y.text()]
+            waypoint2 = [self.waypoint2X.text(), self.waypoint2Y.text()]
+            waypoint3 = [self.waypoint3X.text(), self.waypoint3Y.text()]    
             self.LogsText.append(f"Submitted Waypoints: {waypoint1}, {waypoint2}, {waypoint3}")
 
             if(self.validate_waypoints(self.waypoint1X.text(), self.waypoint1Y.text()) and self.validate_waypoints(self.waypoint2X.text(), self.waypoint2Y.text()) and self.validate_waypoints(self.waypoint3X.text(), self.waypoint3Y.text())):
                 self.LogsText.append("Valid waypoints")
+                waypoints = [waypoint1, waypoint2, waypoint3]
+                self.nav2_client.send_waypoints(waypoints)
             else:
                 self.LogsText.append("Invalid waypoints")
+            
 
-        def validate_waypoints(self,x,y):
+            
 
-            try:
-                x = float(x.strip())
-                y = float(y.strip())
-                return True
-            except ValueError:
-                return False
+
+    def validate_waypoints(self,x,y):
+
+        try:
+            x = float(x.strip())
+            y = float(y.strip())
+            return True
+        except ValueError:
+            return False
+        
+        
