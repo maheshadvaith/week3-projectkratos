@@ -5,12 +5,13 @@ from rclpy.action import ActionClient
 from rclpy.node import Node
 from nav2_msgs.action import NavigateToPose
 from mission_control_gui.main_window import CreateWindow
+from nav_msgs.msg import Odometry
 
 class Client(Node):
     def __init__(self):
         super().__init__("nav2_client")
         self.action_client = ActionClient(self, NavigateToPose, "navigate_to_pose")
-    
+        self.odom_sub = self.create_subscription(Odometry, "/odom", self.odom_callback, 10)
 
     def send_waypoints(self,waypoints):
         self.current_waypoint = 0
@@ -21,6 +22,9 @@ class Client(Node):
     def send_goal(self, waypoint):
         self.logger.log.emit(f"Waiting for server...")
         self.action_client.wait_for_server()
+        self.window.update_connection_textlabel(True)
+        
+        
         goal = NavigateToPose.Goal()
         goal.pose.header.frame_id = "map"
         goal.pose.pose.position.x = float(waypoint[0])
@@ -30,7 +34,7 @@ class Client(Node):
         future.add_done_callback(self.goal_response)
 
     def feedback(self,msg):
-        self.logger.log.emit(f"Feedback: distance remaining: {msg.feedback.distance_remaining} m")
+        self.window.update_other(msg.feedback.distance_remaining, msg.feedback.navigation_time)
     
     
     def goal_response(self,future): 
@@ -56,4 +60,9 @@ class Client(Node):
             self.send_goal(self.waypoints[self.current_waypoint])
         else:
             self.logger.log.emit("All waypoints completed")
-        
+    
+    def odom_callback(self, msg):
+        self.window.update_position_textlabel(msg.pose.pose.position.x, msg.pose.pose.position.y,msg.twist.twist.linear.x, msg.twist.twist.angular.z)
+
+    
+    
