@@ -1,4 +1,13 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication,QWidget, QGridLayout, QLabel, QLineEdit, QPushButton, QTextEdit
+from PyQt5.QtCore import QObject, pyqtSignal
+
+class LogEmitter(QObject):
+    log = pyqtSignal(str)
+    
+
+
+
+
 
 class CreateWindow(QMainWindow):
     def __init__(self, nav2_client):
