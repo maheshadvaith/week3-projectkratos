@@ -1,3 +1,6 @@
+from glob import glob
+import os
+
 from setuptools import find_packages, setup
 
 package_name = 'aruco_search_mission'
@@ -10,6 +13,10 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', 'aruco_search_mission', 'launch'),
+            glob('launch/*.py')),
+        (os.path.join('share', 'aruco_search_mission', 'config'),
+            glob('config/*.yaml')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
