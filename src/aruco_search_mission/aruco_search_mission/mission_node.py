@@ -6,15 +6,16 @@ from rclpy.node import Node
 from rclpy.action import ActionClient
 from nav2_msgs.action import NavigateToPose
 from ament_index_python.packages import get_package_share_directory
-from nav2_client import Nav2Client
+from aruco_search_mission.nav2_client import Nav2Client
 
 class SearchNode(Node):
     def __init__(self):
         super().__init__('mission_node')
+        self.nav2_client = Nav2Client()
         self.load_waypoints()
         self.start_mission()
-        self.nav2_client = Nav2Client()
-        self.nav_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
+        
+        
     
     def load_waypoints(self):
         package_dir = get_package_share_directory("aruco_search_mission")

@@ -16,11 +16,11 @@ class Nav2Client(Node):
         
         goal = NavigateToPose.Goal()
         goal.pose.header.frame_id = "map"
-        goal.pose.pose.position.x = float(waypoint[0])
-        goal.pose.pose.position.y = float(waypoint[1])
+        goal.pose.pose.position.x = float(waypoint["x"])
+        goal.pose.pose.position.y = float(waypoint["y"])
         goal.pose.pose.orientation.w = 1.0 
         
-        self.get_logger().info(f"Dispatching waypoint: x={float(waypoint[0]):.2f}, y={float(waypoint[1]):.2f}")
+        self.get_logger().info(f"Dispatching waypoint: x={float(waypoint['x']):.2f}, y={float(waypoint['y']):.2f}")
         
         future = self.action_client.send_goal_async(goal, feedback_callback=self.feedback)
         future.add_done_callback(self.goal_response)
