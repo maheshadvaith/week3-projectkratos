@@ -8,12 +8,21 @@ from rclpy.node import Node
 from rclpy.action import ActionClient
 from nav2_msgs.action import NavigateToPose
 from ament_index_python.packages import get_package_share_directory
+from geometry_msgs.msg import Twist
+from action_msgs.msg import GoalStatus
+from aruco_search_mission.image_processor import ImageProcessor
+
+
 
 
 class Nav2Client(Node):
     def __init__(self):
         super().__init__('nav2_client')
         self.action_client = ActionClient(self, NavigateToPose, '/navigate_to_pose')
+        self.cmd_vel = self.create_publisher(Twist, "/cmd_vel", 10)
+        self.image_processor = ImageProcessor(self)
+        
+        self.scan_timer = None
         
     def send_goal(self, waypoint):
         self.get_logger().info("Waiting for server...")
@@ -46,6 +55,7 @@ class Nav2Client(Node):
         result = future.result().result
         if result:
             self.get_logger().info("Goal reached successfully.")
+            self.scan_timer = self.create_timer(0.1, self.rotate_robot)
             self.perform_scan()
         else:
             self.get_logger().info("Goal failed.")
@@ -61,10 +71,27 @@ class Nav2Client(Node):
         for i in range(len(self.waypoints)):
             self.get_logger().info(f'Waypoint {i}: {self.waypoints[i]}')
     
+    
     def perform_scan(self):
+        
+        msg = Twist()
+        msg.angular.z = 0.5 
+        
+        self.cmd_vel.publish(msg)
+        
+        
         self.get_logger().info("Performing scan at current location...")
     
     def start_mission(self):
         self.get_logger().info("Starting mission...")
         self.send_goal(self.waypoints[0])
+        
+    def rotate_robot(self):
+        msg = Twist()
+        msg.angular.z = 0.5  
+        self.cmd_vel.publish(msg)
+        if self.image_processor.found_marker:
+            self.scan_timer.cancel()
+            stop = Twist()
+            self.cmd_vel.publish(stop)
         
