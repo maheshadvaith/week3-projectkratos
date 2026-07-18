@@ -19,13 +19,26 @@ class ImageProcessor:
         self.detector = cv2.aruco.ArucoDetector(self.dictionary, cv2.aruco.DetectorParameters())
         
     def image_callback(self, msg):
+    
+        if self.found_marker:
+            return
+
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+
+        corners, ids, _ = self.detector.detectMarkers(frame)
+
+    
+        if ids is not None:
+            cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+
+        
+            self.marker_corners = corners[0]
+            self.marker_id = int(ids[0][0])
+            self.found_marker = True
+
+            self.node.get_logger().info(
+            f"ArUco marker detected! ID: {self.marker_id}"
+        )
 
         cv2.imshow("Robot Camera", frame)
         cv2.waitKey(1)
-
-        corners, ids, rejected = self.detector.detectMarkers(frame)
-
-        self.node.get_logger().info(
-            f"ids={ids}, rejected={len(rejected)}"
-        )
