@@ -1,0 +1,5 @@
+Target found! ID: 67, Rover Position: (1.77, 1.99)
+Target found! ID: 67, Rover Position: (1.80, 1.92)
+Target found! ID: 67, Rover Position: (1.77, 2.00)
+Target found! ID: 67, Rover Position: (1.78, 1.95)
+Target found! ID: 67, Rover Position: (1.77, 1.99)
